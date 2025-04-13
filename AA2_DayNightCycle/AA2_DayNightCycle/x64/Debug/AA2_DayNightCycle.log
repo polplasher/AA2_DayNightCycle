@@ -1,8 +1,8 @@
 ﻿  main.cpp
-D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(118,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(121,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(210,22): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(210,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(210,12): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(213,16): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(117,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(120,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(211,22): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(211,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(211,12): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\AA2_DayNightCycle\main.cpp(214,16): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
   AA2_DayNightCycle.vcxproj -> D:\repos\C++\AA2_DayNightCycle\AA2_DayNightCycle\x64\Debug\AA2_DayNightCycle.exe

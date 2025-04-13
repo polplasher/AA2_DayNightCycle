@@ -17,7 +17,7 @@ void updateLighting()
 	float x = cos((sunAngle * PI) / 180.0f) * SUN_DISTANCE;
 	float y = sin((sunAngle * PI) / 180.0f) * SUN_DISTANCE;
 
-	float position[4] = { x, y, 0.0f, 1.0 };
+	float sunPosition[4] = { x, y, 0.0f, 1.0 };
 
 	// Adjust light intensity based on sun height
 	float intensity = y / SUN_DISTANCE; // Will be between -1 and 1
@@ -28,49 +28,48 @@ void updateLighting()
 
 	if (y > 0)
 	{
-		// Day - full brightness
-		diffuse[0] = 0.9f * intensity;
-		diffuse[1] = 0.9f * intensity;
-		diffuse[2] = 0.9f * intensity;
+		// Day - Sun light
+		float sunIntensity = 0.5f;
+		diffuse[0] = sunIntensity;
+		diffuse[1] = sunIntensity;
+		diffuse[2] = sunIntensity;
 		diffuse[3] = 1.0f;
 
-		specular[0] = 1.0f * intensity;
-		specular[1] = 1.0f * intensity;
-		specular[2] = 1.0f * intensity;
+		specular[0] = 0.3f;
+		specular[1] = 0.3f;
+		specular[2] = 0.3f;
 		specular[3] = 1.0f;
 
-		ambient[0] = 0.7f * intensity;
-		ambient[1] = 0.7f * intensity;
-		ambient[2] = 0.7f * intensity;
+		ambient[0] = sunIntensity;
+		ambient[1] = sunIntensity;
+		ambient[2] = sunIntensity;
 		ambient[3] = 1.0f;
+		glLightfv(GL_LIGHT0, GL_POSITION, sunPosition);
 	}
 	else
 	{
-		// Night - minimal light
-		float nightLevel = 0.1f;
-		diffuse[0] = nightLevel;
-		diffuse[1] = nightLevel;
-		diffuse[2] = nightLevel;
+		// Night - Moon light
+		float moonIntensity = 0.1f;
+		diffuse[0] = moonIntensity;
+		diffuse[1] = moonIntensity;
+		diffuse[2] = moonIntensity;
 		diffuse[3] = 1.0f;
 
-		specular[0] = 0.0f;
-		specular[1] = 0.0f;
-		specular[2] = 0.0f;
+		specular[0] = 0.9f;
+		specular[1] = 0.9f;
+		specular[2] = 0.9f;
 		specular[3] = 1.0f;
 
-		ambient[0] = nightLevel;
-		ambient[1] = nightLevel;
-		ambient[2] = nightLevel * 1.5f; // Slightly blue night
+		ambient[0] = moonIntensity;
+		ambient[1] = moonIntensity;
+		ambient[2] = moonIntensity;
 		ambient[3] = 1.0f;
 	}
 
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	// Set light properties
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
 
 	// Attenuation
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5f);
@@ -128,11 +127,11 @@ void keyPressed_special(int key, int x, int y)
 
 void timer(int)
 {
-	// Update sun angle for day/night cycle
+	// Update sun and moon position
 	sunAngle += DAY_NIGHT_SPEED;
-	if (sunAngle >= 360.0f) {
-		sunAngle = 0.0f;  // Reset to dawn
-	}
+	if (sunAngle >= 360.0f) sunAngle = 0.0f;
+	moonAngle += DAY_NIGHT_SPEED;
+	if (moonAngle >= 360.0f) moonAngle = 0.0f;
 
 	// Update lighting based on new sun position
 	updateLighting();
@@ -140,6 +139,8 @@ void timer(int)
 	glutPostRedisplay();
 	glutTimerFunc(16, timer, 0);
 }
+
+#pragma endregion
 
 #pragma region SceneObjects
 
@@ -249,6 +250,7 @@ void drawSun()
 
 int init(void)
 {
+	// Initialize OpenGL
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 
@@ -264,10 +266,13 @@ int init(void)
 	glLoadIdentity();
 	glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
 
-	updateLighting();
-
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+	// Enable lighting
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	updateLighting();
 
 	return 0;
 }
@@ -278,7 +283,7 @@ void display()
 
 	float diffuse[4] = { 0.65f, 0.0f, 0.0f, 1.0f }; // k_d = k_a
 	float specular[4] = { 0.9f, 0.9f, 0.9f, 1.0f }; // k_s
-	float shininess = 65.0f; // n_s
+	float shininess = 0.6f; // n_s
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
