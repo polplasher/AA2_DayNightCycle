@@ -7,63 +7,107 @@ const float DAY_NIGHT_SPEED = 0.6f;
 const float SUN_DISTANCE = 3.0f;
 
 // Global variables
-float alpha = 0, beta = 0, delta = 1;
+float alpha = 0, beta = 0, delta = 0.5f;
 float sunAngle = 0.0f;
 float moonAngle = 0.0f;
 
+float sunPosition[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+float sunColor[3] = { 1.0f, 1.0f, 0.0f };
+float moonPosition[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+float moonColor[3] = { 0.1f, 0.1f, 0.8f };
+
+#pragma region Lighting
+
+void updateLightingLamp()
+{
+	float diffuse[4]
+	{
+		1,
+		1,
+		0.1f,
+		1.0f,
+	};
+	float specular[4]
+	{
+		0.01f,
+		0.01f,
+		0.01f,
+		1.0f
+	};
+	float ambient[4]
+	{
+		0.8f,
+		0.8f,
+		0.1f,
+		1.0f
+	};
+
+	float position[4]
+	{
+		0.0f,
+		0.85f,
+		-1.0f,
+		1.0f
+	};
+
+	// Set light properties
+	glLightfv(GL_LIGHT1, GL_POSITION, position);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
+
+	// Attenuation
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.8f);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.8f);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.02f);
+}
+
 void updateLighting()
 {
-	// Calculate the sun's position
-	float x = cos((sunAngle * PI) / 180.0f) * SUN_DISTANCE;
-	float y = sin((sunAngle * PI) / 180.0f) * SUN_DISTANCE;
-
-	float sunPosition[4] = { x, y, 0.0f, 1.0 };
-
-	// Adjust light intensity based on sun height
-	float intensity = y / SUN_DISTANCE; // Will be between -1 and 1
+	// Calculate light intensity based on sun height
+	float intensity = std::abs(sunPosition[1] / SUN_DISTANCE); // Will be between -1 and 1
 	intensity = (intensity + 1.0f) / 2.0f; // Convert to 0-1 range
 
-	// Sun color based on height
 	float diffuse[4], specular[4], ambient[4];
-
-	if (y > 0)
+	if (sunPosition[1] > 0)
 	{
-		// Day - Sun light
+		// Day - warm intense colors
 		float sunIntensity = 0.5f;
-		diffuse[0] = sunIntensity;
-		diffuse[1] = sunIntensity;
-		diffuse[2] = sunIntensity;
+		diffuse[0] = sunIntensity * intensity;
+		diffuse[1] = sunIntensity * intensity / 2;
+		diffuse[2] = sunIntensity * intensity / 2;
 		diffuse[3] = 1.0f;
 
-		specular[0] = 0.3f;
-		specular[1] = 0.3f;
-		specular[2] = 0.3f;
+		specular[0] = 0.1f;
+		specular[1] = 0.1f;
+		specular[2] = 0.1f;
 		specular[3] = 1.0f;
 
-		ambient[0] = sunIntensity;
-		ambient[1] = sunIntensity;
-		ambient[2] = sunIntensity;
+		ambient[0] = sunIntensity * intensity;
+		ambient[1] = sunIntensity * intensity;
+		ambient[2] = sunIntensity * intensity / 2;
 		ambient[3] = 1.0f;
 		glLightfv(GL_LIGHT0, GL_POSITION, sunPosition);
 	}
 	else
 	{
-		// Night - Moon light
+		// Night - cool dim colors
 		float moonIntensity = 0.1f;
-		diffuse[0] = moonIntensity;
-		diffuse[1] = moonIntensity;
-		diffuse[2] = moonIntensity;
+		diffuse[0] = moonIntensity * intensity / 2;
+		diffuse[1] = moonIntensity * intensity / 2;
+		diffuse[2] = moonIntensity * intensity;
 		diffuse[3] = 1.0f;
 
-		specular[0] = 0.9f;
-		specular[1] = 0.9f;
-		specular[2] = 0.9f;
+		specular[0] = 0.07f;
+		specular[1] = 0.07f;
+		specular[2] = 0.07f;
 		specular[3] = 1.0f;
 
-		ambient[0] = moonIntensity;
-		ambient[1] = moonIntensity;
-		ambient[2] = moonIntensity;
+		ambient[0] = moonIntensity * intensity / 2;
+		ambient[1] = moonIntensity * intensity / 2;
+		ambient[2] = moonIntensity * intensity;
 		ambient[3] = 1.0f;
+		glLightfv(GL_LIGHT0, GL_POSITION, moonPosition);
 	}
 
 	// Set light properties
@@ -76,24 +120,43 @@ void updateLighting()
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.5f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.01f);
 
+
 	// Update sky color based on time of day
 	float skyR, skyG, skyB;
-	if (y > 0) { // Day
-		skyR = 0.2f + 0.3f * intensity;
-		skyG = 0.5f + 0.3f * intensity;
-		skyB = 0.8f + 0.1f * intensity;
+	if (sunPosition[1] > 0) // Day
+	{
+		skyR = 0.1f * intensity;
+		skyG = 0.5f * intensity;
+		skyB = 0.8f * intensity;
+
+		// Set sun color
+		sunColor[0] = intensity;
+		sunColor[1] = intensity;
+		sunColor[2] = intensity / 2;
 	}
-	else { // Night
-		skyR = 0.01f;
-		skyG = 0.01f;
-		skyB = 0.1f;
+	else // Night
+	{
+		skyR = 0.1f * intensity;
+		skyG = 0.3f * intensity;
+		skyB = 0.6f * intensity;
+
+		// Set lamp light properties
+		updateLightingLamp();
+
+		// Set moon color
+		moonColor[0] = intensity / 1.8f;
+		moonColor[1] = intensity / 1.8f;
+		moonColor[2] = intensity;
 	}
 	glClearColor(skyR, skyG, skyB, 1.0f);
 
+
 	// Reduce global ambient light to make sunlight more important
-	float globalAmbient[4] = { 0.1f, 0.1f, 0.15f, 1.0f };
+	float globalAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
 }
+
+#pragma endregion
 
 #pragma region Utilities
 
@@ -147,7 +210,7 @@ void timer(int)
 void drawHouse()
 {
 	glPushMatrix();
-	glTranslatef(-1.0f, -0.70f, 1.0f);
+	glTranslatef(-1.0f, 0.25f, 1.0f);
 
 	glPushMatrix();
 	glColor3f(0.2f, 0.173f, 0.127f);
@@ -168,7 +231,7 @@ void drawHouse()
 void drawTree()
 {
 	glPushMatrix();
-	glTranslatef(1.0f, -0.95f, 1.0f);
+	glTranslatef(1.0f, 0.0f, 1.0f);
 
 	glPushMatrix();
 	glColor3f(0.55f, 0.27f, 0.07f);
@@ -189,7 +252,7 @@ void drawTree()
 void drawLampPost()
 {
 	glPushMatrix();
-	glTranslatef(0.0f, -0.55f, -1.0f);
+	glTranslatef(0.0f, 0.45f, -1.0f);
 
 	glPushMatrix();
 	glColor3f(0.2f, 0.2f, 0.2f);
@@ -198,9 +261,17 @@ void drawLampPost()
 	glPopMatrix();
 
 	glPushMatrix();
-	glColor3f(0.255f, 0.243f, 0.128f);
+
+	// Disable lighting for the lampost itself (it's a light source)
+	glDisable(GL_LIGHTING);
+
+	glColor3f(0.9f, 0.9f, 0.128f);
 	glTranslatef(0.0f, 0.40f, 0.0f);
 	glutSolidSphere(0.1f, 20, 20);
+
+	// Re-enable lighting
+	glEnable(GL_LIGHTING);
+
 	glPopMatrix();
 
 	glPopMatrix();
@@ -210,7 +281,6 @@ void drawFloor()
 {
 	glColor3f(0.1, 0.8, 0.1);
 	glPushMatrix();
-	glTranslatef(0, -1, 0);
 	glScalef(4.0, 0.1, 4.0);
 	glutSolidCube(1.0f);
 	glPopMatrix();
@@ -221,23 +291,35 @@ void drawSun()
 	glPushMatrix();
 
 	// Calculate the sun's orbit position
-	float x = cos((sunAngle * PI) / 180.0f) * SUN_DISTANCE;
-	float y = sin((sunAngle * PI) / 180.0f) * SUN_DISTANCE;
-	glTranslatef(x, y, 0.0f);
+	sunPosition[0] = cos((sunAngle * PI) / 180.0f) * SUN_DISTANCE; // x
+	sunPosition[1] = sin((sunAngle * PI) / 180.0f) * SUN_DISTANCE; // y
+	glTranslatef(sunPosition[0], sunPosition[1], 0.0f);
 
 	// Disable lighting for the sun itself (it's a light source)
 	glDisable(GL_LIGHTING);
 
-	// Draw sun as a yellow/orange sphere
-	if (sunAngle < 30 || sunAngle > 150) {
-		// Dawn/dusk - orange sun
-		glColor3f(1.0f, 0.6f, 0.0f);
-	}
-	else {
-		// Day - yellow sun
-		glColor3f(1.0f, 1.0f, 0.0f);
-	}
+	glColor3f(sunColor[0], sunColor[1], sunColor[2]);
+	glutSolidSphere(0.3f, 20, 20);
 
+	// Re-enable lighting
+	glEnable(GL_LIGHTING);
+
+	glPopMatrix();
+}
+
+void drawMoon()
+{
+	glPushMatrix();
+
+	// Calculate the moon's orbit position
+	moonPosition[0] = cos(((sunAngle - 180) * PI) / 180.0f) * SUN_DISTANCE; // x
+	moonPosition[1] = sin(((sunAngle - 180) * PI) / 180.0f) * SUN_DISTANCE; // y
+	glTranslatef(moonPosition[0], moonPosition[1], 0.0f);
+
+	// Disable lighting for the moon itself (it's a light source)
+	glDisable(GL_LIGHTING);
+
+	glColor3f(moonColor[0], moonColor[1], moonColor[2]);
 	glutSolidSphere(0.3f, 20, 20);
 
 	// Re-enable lighting
@@ -272,6 +354,7 @@ int init(void)
 	// Enable lighting
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
 	updateLighting();
 
 	return 0;
@@ -296,8 +379,9 @@ void display()
 	glRotatef(alpha, 1, 0, 0);
 	glScalef(delta, delta, delta);
 
-	// Draw the sun
+	// Draw the sun and moon
 	drawSun();
+	drawMoon();
 
 	// Drawing plane zone
 	drawFloor();
@@ -314,7 +398,7 @@ int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize(400, 400);
+	glutInitWindowSize(500, 500);
 	glutCreateWindow("Day-Night Cycle Simulation");
 
 	init();
