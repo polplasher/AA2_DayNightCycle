@@ -279,7 +279,7 @@ void drawLampPost()
 
 void drawFloor()
 {
-	glColor3f(0.1, 0.8, 0.1);
+	glColor3f(0.1, 0.4, 0.1);
 	glPushMatrix();
 	glScalef(4.0, 0.1, 4.0);
 	glutSolidCube(1.0f);
